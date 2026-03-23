@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.14'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.trading'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // Spring Boot Core
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // Zerodha Kite Connect
+    implementation 'com.zerodhatech.kiteconnect:kiteconnect:3.5.1'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

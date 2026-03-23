@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Algo Trading Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .strategy-card {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 6px;
+            background: #eef2f7;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .green { color: green; }
+        .red { color: red; }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #logs {
+            height: 200px;
+            overflow: auto;
+            font-size: 14px;
+        }
+        .orange { color: orange; }
+    </style>
+</head>
+
+<body>
+
+<h1>Algo Trading Dashboard</h1>
+
+<button onclick="login()">Login</button>
+<p id="status"></p>
+
+<div class="container">
+
+    <!-- Live PnL -->
+    <div class="card">
+        <h3>Total PnL</h3>
+        <h2 id="pnl">0</h2>
+    </div>
+
+    <!-- Strategy-wise PnL -->
+    <div class="card">
+        <h3>Strategy PnL</h3>
+        <div id="strategyPnL"></div>
+    </div>
+
+</div>
+
+<div class="container">
+
+    <!-- Positions -->
+    <div class="card">
+        <h3>Positions</h3>
+        <table id="positionsTable">
+            <tr>
+                <th>Symbol</th>
+                <th>Qty</th>
+                <th>Entry</th>
+                <th>Current</th>
+                <th>PnL</th>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Holdings -->
+    <div class="card">
+        <h3>Holdings</h3>
+        <table id="holdingsTable">
+            <tr>
+                <th>Symbol</th>
+                <th>Qty</th>
+                <th>Avg Price</th>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<!-- Trade History -->
+<h2>Trade History</h2>
+<table border="1" id="tradeTable">
+    <thead>
+    <tr>
+        <th>Time</th>
+        <th>Symbol</th>
+        <th>Strategy</th>
+        <th>Entry</th>
+        <th>Exit</th>
+        <th>Qty</th>
+        <th>PnL</th>
+    </tr>
+    </thead>
+    <tbody id="tradeBody"></tbody>
+</table>
+
+<div class="card" style="margin-top:20px;">
+    <h3>Risk Dashboard</h3>
+    <div id="riskDashboard">
+        <div>Current Risk: <span id="currentRisk">0</span></div>
+        <div>Max Risk: <span id="maxRisk">0</span></div>
+        <div>Daily PnL: <span id="dailyPnL">0</span></div>
+        <div>Max Drawdown: <span id="drawdown">0</span></div>
+        <div>Open Positions: <span id="positionsCount">0</span></div>
+        <div>Status: <span id="riskStatus">SAFE</span></div>
+
+    </div>
+</div>
+
+<!-- Logs -->
+<div class="card" style="margin-top:20px;">
+    <h3>Logs</h3>
+    <div id="logs"></div>
+</div>
+
+<script>
+
+    function login() {
+        window.location.href = "/kite/login";
+    }
+
+    // 🔹 Initial Load
+    function loadInitialData() {
+        updatePositions();
+        updateHoldings();
+        loadTradeHistory();
+    }
+
+    // 🔹 Positions
+    function updatePositions() {
+        fetch("/api/positions")
+            .then(res => res.json())
+            .then(data => {
+
+                const table = document.getElementById("positionsTable");
+
+                table.innerHTML = `
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Qty</th>
+                        <th>Entry</th>
+                        <th>Current</th>
+                        <th>PnL</th>
+                    </tr>
+                `;
+
+                data.forEach(p => {
+                    table.innerHTML += `
+                        <tr>
+                            <td>${p.symbol}</td>
+                            <td>${p.qty}</td>
+                            <td>${p.entry}</td>
+                            <td id="price-${p.symbol}">${p.current}</td>
+                            <td id="pnl-${p.symbol}" class="${p.pnl >= 0 ? 'green' : 'red'}">${p.pnl}</td>
+                        </tr>
+                    `;
+                });
+            });
+    }
+
+    // 🔹 Holdings
+    function updateHoldings() {
+        fetch("/api/holdings")
+            .then(res => res.json())
+            .then(data => {
+
+                const table = document.getElementById("holdingsTable");
+
+                table.innerHTML = `
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Qty</th>
+                        <th>Avg Price</th>
+                    </tr>
+                `;
+
+                data.forEach(h => {
+                    table.innerHTML += `
+                        <tr>
+                            <td>${h.symbol}</td>
+                            <td>${h.qty}</td>
+                            <td>${h.avgPrice}</td>
+                        </tr>
+                    `;
+                });
+            });
+    }
+
+    // 🔹 Trade History
+    function loadTradeHistory() {
+        fetch("/api/trades")
+            .then(res => res.json())
+            .then(data => {
+
+                const table = document.getElementById("tradeTable");
+
+                data.forEach(t => {
+                    table.innerHTML += `
+                        <tr>
+                            <td>${t.symbol}</td>
+                            <td>${t.strategy}</td>
+                            <td>${t.entry}</td>
+                            <td>${t.exit}</td>
+                            <td class="${t.pnl >= 0 ? 'green' : 'red'}">${t.pnl}</td>
+                        </tr>
+                    `;
+                });
+            });
+    }
+
+    // 🔥 WebSocket
+    const socket = new WebSocket("ws://localhost:8080/ws/live");
+
+    socket.onmessage = function(event) {
+
+        const data = JSON.parse(event.data);
+
+        // 🔥 TICK
+        if (data.type === "TICK") {
+            const priceCell = document.getElementById("price-" + data.symbol);
+            if (priceCell) {
+                priceCell.innerText = data.price;
+            }
+        }
+
+        // 🔥 TOTAL PnL
+        if (data.type === "PNL") {
+            const pnlEl = document.getElementById("pnl");
+            pnlEl.innerText = data.value;
+            pnlEl.className = data.value >= 0 ? "green" : "red";
+        }
+
+        // 🔥 STRATEGY PnL
+        if (data.type === "STRATEGY_PNL") {
+
+            const container = document.getElementById("strategyPnL");
+            container.innerHTML = "";
+
+            for (let strategy in data.value) {
+                const pnl = data.value[strategy];
+
+                container.innerHTML += `
+                    <div class="strategy-card ${pnl >= 0 ? 'green' : 'red'}">
+                        ${strategy}: ₹${pnl}
+                    </div>
+                `;
+            }
+        }
+
+    if (data.type === "RISK") {
+
+    document.getElementById("currentRisk").innerText = data.current;
+    document.getElementById("maxRisk").innerText = data.max;
+    document.getElementById("dailyPnL").innerText = data.pnl;
+    document.getElementById("drawdown").innerText = data.drawdown;
+    document.getElementById("positionsCount").innerText = data.positions;
+
+    const statusEl = document.getElementById("riskStatus");
+    statusEl.innerText = data.status;
+
+    if (data.status === "SAFE") statusEl.className = "green";
+    else if (data.status === "WARNING") statusEl.className = "orange";
+    else statusEl.className = "red";
+}
+
+        // 🔥 LOGS
+        if (data.type === "LOG") {
+            const logBox = document.getElementById("logs");
+
+            logBox.innerHTML =
+                "<div>" + new Date().toLocaleTimeString() +
+                " - " + data.message + "</div>" + logBox.innerHTML;
+        }
+
+        // 🔥 TRADE UPDATE (optional real-time)
+        if (data.type === "TRADE") {
+            const table = document.getElementById("tradeBody");
+            const row = table.insertRow(0); // latest on top
+            const time = new Date().toLocaleTimeString();
+            row.innerHTML = `
+            <td>${time}</td>
+            <td>${data.symbol}</td>
+            <td>${data.strategy}</td>
+            <td>${data.entry.toFixed(2)}</td>
+            <td>${data.exit.toFixed(2)}</td>
+            <td>${data.qty}</td>
+            <td style="color:${data.pnl >= 0 ? 'green' : 'red'}">
+                ${data.pnl.toFixed(2)}
+            </td>
+        `;
+        }
+    };
+
+    // 🔥 Init
+    window.onload = function() {
+        loadInitialData();
+    };
+
+</script>
+
+</body>
+</html>
