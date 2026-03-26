@@ -14,6 +14,6 @@ public class BacktestRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        backtestEngine.runBacktest( SampleData.getData(), "RELIANCE");
+//        backtestEngine.runBacktest( SampleData.getData(), "RELIANCE");
     }
 }
