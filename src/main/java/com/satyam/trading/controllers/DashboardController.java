@@ -1,5 +1,6 @@
 package com.satyam.trading.controllers;
 
+import com.satyam.trading.authentication.TokenStore;
 import com.satyam.trading.marketConnect.MarketDataService;
 import com.satyam.trading.model.Position;
 import com.satyam.trading.model.TradeHistory;
@@ -22,7 +23,7 @@ public class DashboardController {
 
     private final ExecutionEngine executionEngine;
     private final MarketDataService marketDataService;
-    private final String ACCESS_TOKEN = "cmbcya4fy9FF9ufsgesRXKwLioqe1uj6";
+    private final TokenStore tokenStore;
 
     @GetMapping("/positions")
     public List<Map<String, Object>> getPositions() {
@@ -93,6 +94,6 @@ public class DashboardController {
 
     @GetMapping("/instruments")
     public List<Instrument> getInstruments() throws KiteException, Exception {
-       return marketDataService.getInstrumentsForExchange(ACCESS_TOKEN, "NSE");
+       return marketDataService.getInstrumentsForExchange(tokenStore.getAccessToken(), "NSE");
     }
 }

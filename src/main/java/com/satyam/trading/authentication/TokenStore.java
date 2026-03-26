@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenStore {
 
-    private String accessToken="X7hKVMF2fQfrF9pN0XZFQqBFYj8g9lh5";
+    private String accessToken;
 
     public String getAccessToken() {
         return accessToken;

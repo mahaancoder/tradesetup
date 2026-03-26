@@ -231,12 +231,11 @@
         fetch("/api/trades")
             .then(res => res.json())
             .then(data => {
-
                 const table = document.getElementById("tradeTable");
-
                 data.forEach(t => {
                     table.innerHTML += `
                         <tr>
+                            <td>${t.timestamp}</td>
                             <td>${t.symbol}</td>
                             <td>${t.strategy}</td>
                             <td>${t.entry}</td>

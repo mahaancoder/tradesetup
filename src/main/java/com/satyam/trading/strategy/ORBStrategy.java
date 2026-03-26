@@ -107,7 +107,7 @@ public class ORBStrategy implements TradingStrategy {
             System.out.println("🚀 ORB BUY Triggered [" + symbol + "] @ " + price);
 
             // 🔥 SL = range low
-            double atr = atrService.calculateATR(symbol, price, price, price);
+            double atr = atrService.calculateATR(symbol, high, low, price);
 
             double stopLoss = price - (atr * 1.5); // multiplier
 

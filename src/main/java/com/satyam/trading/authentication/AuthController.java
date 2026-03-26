@@ -1,8 +1,11 @@
 package com.satyam.trading.authentication;
 
+import com.satyam.trading.controllers.InstrumentLoaderService;
 import com.satyam.trading.executionengine.ExecutionEngine;
+import com.satyam.trading.websocket.WebSocketService;
 import com.zerodhatech.kiteconnect.kitehttp.exceptions.KiteException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +22,11 @@ public class AuthController {
     private final AuthService authService;
     private final TokenStore tokenStore;
     private final ExecutionEngine executionEngine;
+    private final InstrumentLoaderService instrumentLoaderService;
+    private final WebSocketService webSocketService;
+    private boolean isStarted = true;
+    @Value("${kite.api.key}")
+    private String apiKey;
 
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws Exception {
@@ -34,7 +42,11 @@ public class AuthController {
 
         // ✅ Save token
         tokenStore.setAccessToken(accessToken);
-
+        instrumentLoaderService.loadNSEEquityInstruments(accessToken);
+        if(!isStarted) {
+            webSocketService.startTicker(apiKey, accessToken);
+            isStarted = true;
+        }
         // ✅ Redirect back to UI
         response.sendRedirect("/?status=success");
     }

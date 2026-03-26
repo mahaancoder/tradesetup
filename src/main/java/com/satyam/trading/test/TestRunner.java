@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class TestRunner implements CommandLineRunner {
 
     private final MarketDataService marketDataService;
-    private final String ACCESS_TOKEN = "cmbcya4fy9FF9ufsgesRXKwLioqe1uj6";
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -46,7 +46,7 @@ public class TestRunner implements CommandLineRunner {
 //        }
 
         System.out.println("✅ Application started successfully!");
-        System.out.println("📡 Server running at: http://localhost:8080");
-        System.out.println("🔐 Login URL: http://localhost:8080/kite/login");
+//        System.out.println("📡 Server running at: http://localhost:8080");
+//        System.out.println("🔐 Login URL: http://localhost:8080/kite/login");
     }
 }
