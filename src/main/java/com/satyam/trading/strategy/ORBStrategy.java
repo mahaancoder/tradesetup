@@ -25,8 +25,8 @@ public class ORBStrategy implements TradingStrategy {
     private final Map<String, Long> lastTradeTimeMap = new HashMap<>();
 
     // 🔥 Config
-    private static final LocalTime RANGE_START = LocalTime.of(9, 35);
-    private static final LocalTime RANGE_END = LocalTime.of(9, 40);
+    private static final LocalTime RANGE_START = LocalTime.of(9, 52);
+    private static final LocalTime RANGE_END = LocalTime.of(9, 59);
     private static final LocalTime TRADE_CUTOFF = LocalTime.of(11, 0);
 
     private static final double BREAKOUT_BUFFER = 0.001; // 0.1%
