@@ -24,7 +24,7 @@ public class AuthController {
     private final ExecutionEngine executionEngine;
     private final InstrumentLoaderService instrumentLoaderService;
     private final WebSocketService webSocketService;
-    private boolean isStarted = true;
+    private boolean isStarted = false;
     @Value("${kite.api.key}")
     private String apiKey;
 
