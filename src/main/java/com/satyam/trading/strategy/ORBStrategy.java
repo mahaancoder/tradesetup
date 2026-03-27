@@ -25,8 +25,8 @@ public class ORBStrategy implements TradingStrategy {
     private final Map<String, Long> lastTradeTimeMap = new HashMap<>();
 
     // 🔥 Config
-    private static final LocalTime RANGE_START = LocalTime.of(9, 15);
-    private static final LocalTime RANGE_END = LocalTime.of(9, 30);
+    private static final LocalTime RANGE_START = LocalTime.of(9, 35);
+    private static final LocalTime RANGE_END = LocalTime.of(9, 40);
     private static final LocalTime TRADE_CUTOFF = LocalTime.of(11, 0);
 
     private static final double BREAKOUT_BUFFER = 0.001; // 0.1%
@@ -43,10 +43,10 @@ public class ORBStrategy implements TradingStrategy {
 
         LocalTime now = LocalTime.now();
 
-        // ❌ Do not trade after cutoff time
-        if (now.isAfter(TRADE_CUTOFF)) {
-            return null;
-        }
+//        // ❌ Do not trade after cutoff time
+//        if (now.isAfter(TRADE_CUTOFF)) {
+//            return null;
+//        }
 
         // 🔥 Get current state
         double high = highMap.getOrDefault(symbol, Double.MIN_VALUE);
@@ -65,15 +65,14 @@ public class ORBStrategy implements TradingStrategy {
 
                 highMap.put(symbol, high);
                 lowMap.put(symbol, low);
-
+                System.out.println(symbol+" high: " + high);
+                System.out.println(symbol+" low: " + low);
                 return null;
             }
 
             // Lock range after 9:30
             if (now.isAfter(RANGE_END)) {
-
                 rangeCapturedMap.put(symbol, true);
-
                 System.out.println("📊 ORB Range Set [" + symbol + "] High=" + high + " Low=" + low);
             }
         }
@@ -103,14 +102,11 @@ public class ORBStrategy implements TradingStrategy {
             // ✅ Mark trade taken
             tradeTakenMap.put(symbol, true);
             lastTradeTimeMap.put(symbol, System.currentTimeMillis());
-
-            System.out.println("🚀 ORB BUY Triggered [" + symbol + "] @ " + price);
-
             // 🔥 SL = range low
             double atr = atrService.calculateATR(symbol, high, low, price);
-
+            System.out.println("symbol: "+ symbol + " high : "+ high + " low : "+ low + " atr : "+ atr);
             double stopLoss = price - (atr * 1.5); // multiplier
-
+            System.out.println("🚀 ORB BUY Triggered [" + symbol + "] @ " + price + "with stoploss @ "+ stopLoss);
             return new TradeSignal(
                     symbol,
                     "BUY",
